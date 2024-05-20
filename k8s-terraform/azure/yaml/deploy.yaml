@@ -1,0 +1,75 @@
+trigger:
+- main
+
+resources:
+- repo: self
+
+variables:
+  # Replace these with your Azure resource names
+  resourceGroupName: 'MyResourceGroup'
+  containerRegistryName: 'myContainerRegistry.azurecr.io'
+  kubernetesServiceConnection: 'myK8sCluster'
+  imageName: 'myapp'
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  jobs:
+  - job: BuildImage
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Docker@2
+      displayName: 'Build an image'
+      inputs:
+        command: build
+        repository: $(containerRegistryName)/$(imageName)
+        dockerfile: '**/Dockerfile'
+        tags: |
+          $(tag)
+
+- stage: Push
+  jobs:
+  - job: PushImage
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Docker@2
+      displayName: 'Login to ACR'
+      inputs:
+        command: login
+        containerRegistry: |
+          $(containerRegistryName)
+    - task: Docker@2
+      displayName: 'Push image'
+      inputs:
+        command: push
+        repository: $(containerRegistryName)/$(imageName)
+        tags: |
+          $(tag)
+
+- stage: Deploy
+  jobs:
+  - job: DeployToAKS
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: none
+    - task: Kubernetes@1
+      displayName: 'Set Kubectl Context'
+      inputs:
+        connectionType: 'Azure Resource Manager'
+        azureSubscriptionEndpoint: $(kubernetesServiceConnection)
+        azureResourceGroup: $(resourceGroupName)
+        kubernetesCluster: $(kubernetesServiceConnection)
+        command: 'use-context'
+    - task: Kubernetes@1
+      displayName: 'Deploy to AKS'
+      inputs:
+        connectionType: 'Azure Resource Manager'
+        azureSubscriptionEndpoint: $(kubernetesServiceConnection)
+        azureResourceGroup: $(resourceGroupName)
+        kubernetesCluster: $(kubernetesServiceConnection)
+        command: apply
+        arguments: '-f deployment.yaml'
+        useConfigurationFile: true

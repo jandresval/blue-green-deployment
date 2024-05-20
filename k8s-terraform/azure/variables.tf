@@ -1,37 +1,27 @@
-variable "region" {
-  description = "Azure infrastructure region"
+
+variable "node_count" {
+  type        = number
+  description = "The initial quantity of nodes for the node pool."
+  default     = 3
+}
+
+variable "username" {
   type        = string
-  default     = "eastus"
+  description = "The admin username for the new cluster."
+  default     = "azureadmin"
+}
+
+variable "region" {
+  type    = string
+  default = "eastus"
 }
 
 variable "location" {
-  description = "Azure infrastructure region abbreviation"
-  type        = string
-  default     = "eus"
+  type    = string
+  default = "eastus"
 }
 
-variable "environment" {
-  description = "Application environment"
-  type        = string
-  default     = "dev"
-}
-
-variable "container_app_name" {
-  description = "Container app name"
-  type        = string
-  default     = "api"
-}
-
-variable "project_name" {
-  description = "Used for naming resources"
-  type        = string
-  default     = "bg"
-}
-
-locals {
-  default_tags = {
-    environment  = var.environment
-    owner        = "J.Son"
-    project_name = var.project_name
-  }
+variable "base_project_name" {
+  type = string
+  default = "bg5-dev-eus"
 }
