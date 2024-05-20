@@ -26,3 +26,17 @@ Run the following command to validate api deployment: `curl http://localhost`
 Run the following commands to dispose of created services: 
 1. `kubectl delete service/simple-webapp`
 2. `kubectl delete deployment/simple-webapp`
+
+
+## Azure
+To deploy the Azure servies:
+- Install az CLI
+- `az login`
+- `az account set --subscription '<SUBSCRIPTION_ID>'`
+- cd `cd .\k8s-terraform\azure`
+- `terraform init`
+- `terraform apply`
+
+For troubleshooting: 
+- https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#example-usage
+- https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/azure_cli
